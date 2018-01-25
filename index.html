@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
+    <meta content="telephone=no" name="format-detection">
+    <meta name="applicable-device" content="mobile">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no">
+    <title>自定义swiper 切换</title>
+    <link rel="icon" type="image/x-icon" href="http://mat1.gtimg.com/www/icon/favicon2.ico">
+    <link rel="stylesheet" href="http://guangzhou.auto.qq.com/css/conmon.css">
+    <link rel="stylesheet" type="text/css" href="http://www.yetcar.com/Public/static/bus/css/cropper.css">
+    <script>
+        //适配 rem
+        (function(doc) {
+            var scale = 1 / devicePixelRatio;
+            doc.querySelector('meta[name="viewport"]').setAttribute('content', 'initial-scale=' + scale + ', maximum-scale=' + scale + ', minimum-scale=' + scale + ', user-scalable=no');
+            doc.documentElement.style.fontSize = doc.documentElement.clientWidth / 10 + 'px';
+        })(document);
+    </script>
+    <style>
+        html,body {  height: 100%;  margin: 0 auto; background-color: #eaeaee;  }
+        img { border: none;  vertical-align: bottom;  max-width: 100%;  }
+        .swiper-container{  height: 100%; width: 10rem }
+        .swiper-slide{
+            overflow: hidden;
+            color: #333;
+            background: #e4caa9;
+            text-align: center;
+            font-size: 18px;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            -webkit-justify-content: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            -webkit-align-items: center;
+            align-items: center;
+            position: relative;
+        }
+        .pagebg,.content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .swiper-slide {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .page1 {
+            z-index: 10;
+        }
+        .page2 {
+            z-index: 9;
+        }
+        .page3 {
+            z-index: 8;
+        }
+        .page4 {
+            z-index: 7;
+        }
+        .swiper-slide.move {
+            -webkit-animation: zoomOutDown .5s .3s forwards;
+        }
+        .swiper-slide.hide {
+            z-index: 0;
+        }
+        .swiper-slide.active {
+            z-index: 999;
+        }
+        .page1 .pagebg {
+            background: url("http://www.yetcar.com/Public/static/bus/img/bus_page3.jpg") top center no-repeat;
+            background-size: 100% auto;
+        }
+        .page2 .pagebg {
+            background: url("http://www.yetcar.com/Public/static/bus/img/bus_page4.jpg") top center no-repeat;
+            background-size: 100% auto;
+        }
+        .page3 .pagebg {
+            /*background: url("http://img1.gtimg.com/autoguangzhou/pics/hv1/38/73/207/13478828.jpg") top center no-repeat;*/
+            /*background-size: 100% auto;*/
+        }
+        .page4 .pagebg {
+            /*background: url("http://www.yetcar.com/Public/static/bus/img/bus_page4.jpg") top center no-repeat;*/
+            /*background-size: 100% auto;*/
+        }
+        .page1 .up, .page1 canvas,.page1 input,.page2 #showImg {
+            position: absolute;
+            left: 1.2rem;
+            top: 2.2rem;
+            width: 7.5rem;
+            height: 9.2rem;
+        }
+        .page1 .upload {
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            left: 0;
+            top: 0;
+        }
+        .page1 #upImg {
+            opacity: -2;
+        }
+        .page1 .next {
+            position: absolute;
+            width: 3rem;
+            height: 0.8rem;
+            line-height: 0.8rem;
+            top: 13.5rem;
+            left: 6rem;
+            border: 1px solid red;
+            text-align: center;
+            font-size: 0.5rem;
+            border-radius: 0.2rem;
+            display: none;
+        }
+        .page3 #canvas2 {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 10rem;
+            height: 16.12rem;
+        }
+        .page3 .hide {
+            z-index: -10;
+            opacity: 0;
+        }
+        .page2 .next {
+            position: absolute;
+            width: 4.1rem;
+            height: 0.9rem;
+            line-height: 0.8rem;
+            top: 13.7rem;
+            left: 5.3rem;
+            text-align: center;
+            font-size: 0.5rem;
+            border-radius: 0.2rem;
+        }
+        .page3 #poto {
+            width: 7.5rem;
+            height: 9.2rem;
+            position: absolute;
+            top: 2.2rem;
+            left: 1.2rem;
+        }
+        .page3 #savePhoto {
+            width: 10rem;
+            height: 16.12rem;
+        }
+    </style>
+</head>
+<body>
+<div class="swiper-container">
+    <div class="swiper-wrapper">
+        <div class="swiper-slide page1 active">
+            <div class="pagebg"></div>
+            <div class="content">
+                <canvas id="canvas1"></canvas>
+                <div class="up">
+                    <input type="file" class="upload" name=""  value="">
+                    <img src="" alt="" id="upImg">
+                </div>
+                <div class="next">剪裁图片</div>
+            </div>
+        </div>
+        <div class="swiper-slide page2">
+            <div class="pagebg">
+                <div class="content">
+                    <img src="" alt="" id="showImg">
+                    <div class="next"></div>
+                </div>
+            </div>
+        </div>
+        <div class="swiper-slide page3" id="page3">
+            <div class="pagebg"></div>
+            <canvas id="canvas2"></canvas>
+            <img src="img/img1.jpg" alt="" id="bgImg" class="hide">
+            <img src="img/img2.jpg" alt="" id="poto" class="hide">
+        </div>
+        <!--<div class="swiper-slide page4">-->
+            <!--<div class="pagebg"></div>-->
+        <!--</div>-->
+    </div>
+</div>
+</body>
+<script src="http://dongguan.auto.qq.com/js/publicJS/jquery.min.js"></script>
+<script src="http://www.yetcar.com/Public/static/bus/js/cropper.js"></script>
+<script>
+    var ratioDesign = 1.612;
+    var dh = document.body.clientWidth*ratioDesign;
+    var sx = 0, sy = 0, sw = 0, sh = 0, w = document.body.clientWidth * 0.755, h = dh * 0.579,jcsrc = '';
+    var upBtn = $('.page1 input');
+    var canvas1 = document.getElementById('canvas1');
+    var ctx1 = canvas1.getContext('2d');
+    canvas1.width = canvas1.clientWidth;
+    canvas1.height = canvas1.clientHeight;
+    ctx1.fillStyle = 'transparent';
+    ctx1.fillRect(0,0,canvas1.width,canvas1.height);
+    upBtn.change(function () {
+        var upFile = this.files[0];
+        var upImgSrc = window.URL.createObjectURL(upFile)|| window.webkitURL.createObjectURL(upFile);
+        upImg.src = upImgSrc;
+        $('.up > img').cropper({
+            aspectRatio: 1 / 1.236,
+            crop: function(data) {
+                sx = parseInt(data.x);
+                sy = parseInt(data.y);
+                sw = parseInt(data.width);
+                sh = parseInt(data.height);
+            }
+        });
+        $('.page1 .next').fadeIn(300)
+    });
+    $('.page1 .next').click(function () {
+        $('.page1').addClass('hide').next().addClass('active').siblings().removeClass('active');
+        ctx1.drawImage(upImg,sx,sy,sw,sh,0,0,w,h);
+        jcsrc = canvas1.toDataURL("image/jpeg");
+        $('.page2 #showImg').attr('src',jcsrc);
+    });
+    $('.page2 .next').click(function () {
+        $('.page2').addClass('hide').next().addClass('active').siblings().removeClass('active');
+        var canvas2 = document.getElementById('canvas2');
+        var saveSrc;
+        var poto = document.getElementById('poto');
+        var ctx2 = canvas2.getContext('2d');
+        poto.src = jcsrc;
+        canvas2.width = canvas2.clientWidth;
+        canvas2.height = canvas2.clientHeight;
+        ctx2.fillStyle = 'white';
+        var pl = 0.119 * document.body.clientWidth;
+        var pt = 0.1836 * dh;
+        ctx2.fillRect(0,0,canvas2.width,canvas2.height);
+        ctx2.drawImage(document.getElementById('bgImg'),0,0,canvas2.width,canvas2.height);
+        ctx2.drawImage(poto,pl,pt,poto.offsetWidth,poto.offsetHeight);
+        saveSrc = canvas2.toDataURL("image/jpeg");
+        $('#page3').append("<img id='savePhoto'  style='vertical-align:top;' src='" + saveSrc + "' alt='from canvas'/>")
+        $('#savePhoto').siblings().remove()
+    });
+</script>
+</html>
